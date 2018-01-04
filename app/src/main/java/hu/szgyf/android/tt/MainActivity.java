@@ -1,5 +1,6 @@
 package hu.szgyf.android.tt;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -26,6 +27,11 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
+        Intent i = getIntent();
+        Toast.makeText(this,
+                i.getStringExtra("text"),
+                Toast.LENGTH_LONG).show();
+
         setContentView(R.layout.activity_main);
 
         RelativeLayout rl = (RelativeLayout) findViewById(R.id.rl);
@@ -50,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
         });*/
 
         if (savedInstanceState == null) {
-            column = 4;
-            row = 4;
+            column = i.getIntExtra("xc",4);
+            row = i.getIntExtra("yc",4);
         }
 
         rl.post(new Runnable() {
