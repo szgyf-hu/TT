@@ -1,19 +1,18 @@
 package hu.szgyf.android.tt;
 
-import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
+import android.os.PersistableBundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,79 +49,113 @@ public class MainActivity extends AppCompatActivity {
             }
         });*/
 
+        if (savedInstanceState == null) {
+            column = 4;
+            row = 4;
+        }
+
         rl.post(new Runnable() {
             @Override
             public void run() {
-                RelativeLayout rl = (RelativeLayout) findViewById(R.id.rl);
-
-                Drawable d =
-                        getResources().
-                                getDrawable(R.drawable.hatterkep);
-
-                rl.setBackground(d);
-
-                Toast.makeText(MainActivity.this,
-                        "" + rl.getWidth() + ";" + rl.getHeight(),
-                        Toast.LENGTH_LONG).show();
-
-                int tiles = (int) (
-                        ((rl.getWidth() < rl.getHeight())
-                                ?
-                                (rl.getWidth())
-                                :
-                                (rl.getHeight())) * 0.9
-                                /
-                                ((COLUMN < ROW) ? (ROW) : (COLUMN))
-                );
-
-
-                int ox = (rl.getWidth() - tiles * COLUMN) / 2;
-                int oy = (rl.getHeight() - tiles * ROW) / 2;
-
-                int tmp = 0;
-
-                for (int y = 0; y < ROW; y++)
-                    for (int x = 0; x < COLUMN; x++) {
-                        TextView tv = new TextView(MainActivity.this);
-                        tvs[tmp] = tv;
-                        tv.setText("hello word");
-                        tv.setBackgroundColor(Color.CYAN);
-                        tv.setId(tmp++);
-                        tv.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                                click(v.getId());
-                            }
-                        });
-
-                        RelativeLayout.LayoutParams lp =
-                                new RelativeLayout.LayoutParams(tiles, tiles);
-                        lp.topMargin = oy + tiles * y;
-                        lp.leftMargin = ox + tiles * x;
-                        rl.addView(tv, lp);
-                    }
-
-                randomGen();
-                refreshUi();
+                newGame();
             }
         });
     }
 
-    static final int COLUMN = 3;
-    static final int ROW = 3;
+    int column;
+    int row;
 
+    ImageView ivs[];
+    int values[];
+    Bitmap bmps[];
 
-    TextView tvs[] = new TextView[COLUMN * ROW];
-    int values[] = new int[COLUMN * ROW];
+    long newGameTimestamp;
+
+    void newGame() {
+
+        if (values == null) {
+            // nincs visszaállított állapot
+            values = new int[column * row];
+            randomGen();
+        }
+
+        RelativeLayout rl = (RelativeLayout) findViewById(R.id.rl);
+        rl.removeAllViews();
+
+        ivs = new ImageView[column * row];
+        bmps = new Bitmap[column * row];
+
+        Drawable d = getResources().getDrawable(R.drawable.hatterkep);
+        rl.setBackground(d);
+
+        int tiles = (int) (
+                ((rl.getWidth() < rl.getHeight())
+                        ?
+                        (rl.getWidth())
+                        :
+                        (rl.getHeight())) * 0.9
+                        /
+                        ((column < row) ? (row) : (column))
+        );
+
+        int ox = (rl.getWidth() - tiles * column) / 2;
+        int oy = (rl.getHeight() - tiles * row) / 2;
+
+        int tmp = 0;
+
+        for (int y = 0; y < row; y++)
+            for (int x = 0; x < column; x++) {
+                ImageView iv = new ImageView(MainActivity.this);
+                ivs[tmp] = iv;
+                //iv.setBackgroundColor(Color.CYAN);
+                iv.setId(tmp++);
+                iv.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        click(v.getId());
+                    }
+                });
+
+                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(tiles, tiles);
+                lp.topMargin = oy + tiles * y;
+                lp.leftMargin = ox + tiles * x;
+                rl.addView(iv, lp);
+            }
+
+        BitmapDrawable bd = (BitmapDrawable) getResources().getDrawable(R.drawable.monguz);
+        Bitmap bmp = bd.getBitmap();
+
+        int bmpw = bmp.getWidth() / column;
+        int bmph = bmp.getHeight() / row;
+
+        for (int i = 0; i < column * row; i++) {
+
+            pos p = id2xy(i);
+            bmps[i] = Bitmap.createBitmap(bmp,
+                    p.x * bmpw,
+                    p.y * bmph,
+                    bmpw,
+                    bmph);
+        }
+
+        //bmp.recycle();
+
+        refreshUi();
+
+        newGameTimestamp = System.currentTimeMillis();
+    }
 
     void refreshUi() {
 
-        for (int i = 0; i < COLUMN * ROW; i++) {
+        for (int i = 0; i < column * row; i++) {
+            ivs[i].setImageBitmap(bmps[values[i]]);
+            ivs[i].setScaleType(ImageView.ScaleType.FIT_XY);
 
-            tvs[i].setText("" + values[i]);
-            tvs[i].setVisibility(
-                    values[i] == (COLUMN * ROW - 1)
+            ivs[i].setVisibility(
+                    values[i] == (column * row - 1)
+                            &&
+                            isGameOver() == false
                             ?
                             (View.INVISIBLE)
                             :
@@ -132,23 +165,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void randomGen() {
-
-        for (int i = 0; i < COLUMN * ROW; i++)
+        for (int i = 0; i < column * row; i++)
             values[i] = i;
 
-        values[COLUMN * ROW - 1] = COLUMN * ROW - 2;
-        values[COLUMN * ROW - 2] = COLUMN * ROW - 1;
+        values[column * row - 1] = column * row - 2;
+        values[column * row - 2] = column * row - 1;
 
         /*
         Random r = new Random();
 
-        for (int i = 0; i < COLUMN * ROW; i++) {
+        for (int i = 0; i < column * row; i++) {
 
             boolean oke;
 
             do {
                 oke = true;
-                values[i] = r.nextInt(COLUMN * ROW);
+                values[i] = r.nextInt(column * row);
                 for (int j = 0; (j < i) && (oke == true); j++) {
                     if (values[i] == values[j])
                         oke = false;
@@ -159,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     int xy2id(int x, int y) {
-        return y * COLUMN + x;
+        return y * column + x;
     }
 
     class pos {
@@ -170,13 +202,17 @@ public class MainActivity extends AppCompatActivity {
     pos id2xy(int id) {
         pos p = new pos();
 
-        p.x = id % COLUMN;
-        p.y = id / COLUMN;
+        p.x = id % column;
+        p.y = id / column;
 
         return p;
     }
 
     void click(int id) {
+
+        if (isGameOver())
+            return;
+
         pos p = id2xy(id);
         int x = p.x;
         int y = p.y;
@@ -184,54 +220,78 @@ public class MainActivity extends AppCompatActivity {
         // Bal szomszéd vizsgálata
 
         if (x > 0)
-            if (values[xy2id(x - 1, y)] == (COLUMN * ROW - 1)) {
+            if (values[xy2id(x - 1, y)] == (column * row - 1)) {
                 values[xy2id(x - 1, y)] = values[id];
-                values[id] = (COLUMN * ROW - 1);
+                values[id] = (column * row - 1);
                 refreshUi();
             }
 
         // jobb szomszéd
 
-        if (x < (COLUMN - 1))
-            if (values[xy2id(x + 1, y)] == (COLUMN * ROW - 1)) {
+        if (x < (column - 1))
+            if (values[xy2id(x + 1, y)] == (column * row - 1)) {
                 values[xy2id(x + 1, y)] = values[id];
-                values[id] = (COLUMN * ROW - 1);
+                values[id] = (column * row - 1);
                 refreshUi();
             }
 
         // felső szomszéd
 
         if (y > 0)
-            if (values[xy2id(x, y - 1)] == (COLUMN * ROW - 1)) {
+            if (values[xy2id(x, y - 1)] == (column * row - 1)) {
                 values[xy2id(x, y - 1)] = values[id];
-                values[id] = (COLUMN * ROW - 1);
+                values[id] = (column * row - 1);
                 refreshUi();
             }
 
         // alsó szomszéd
 
-        if (y < (ROW - 1))
-            if (values[xy2id(x, y + 1)] == (COLUMN * ROW - 1)) {
+        if (y < (row - 1))
+            if (values[xy2id(x, y + 1)] == (column * row - 1)) {
                 values[xy2id(x, y + 1)] = values[id];
-                values[id] = (COLUMN * ROW - 1);
+                values[id] = (column * row - 1);
                 refreshUi();
             }
 
-        if (checkGameOver()) {
-            Toast.makeText(this, "Gém óvör!", Toast.LENGTH_LONG).show();
+        if (isGameOver()) {
+
+            int sec = (int) (System.currentTimeMillis() - newGameTimestamp) / 1000;
+
+            Toast.makeText(this, "Gém óvör! sec:" + sec, Toast.LENGTH_LONG).show();
 
             MediaPlayer mp = MediaPlayer.create(this, R.raw.applause2);
             mp.start();
         }
     }
 
-    boolean checkGameOver(){
+    boolean isGameOver() {
 
-        for (int i=0; i<COLUMN * ROW; i++)
-            if(values[i] != i)
+        for (int i = 0; i < column * row; i++)
+            if (values[i] != i)
                 return false;
 
         return true;
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt("column", column);
+        outState.putInt("row", row);
+        outState.putIntArray("values", values);
+        outState.putLong("newGameTimestamp", newGameTimestamp);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        column = savedInstanceState.getInt("column");
+        row = savedInstanceState.getInt("row");
+        values = savedInstanceState.getIntArray("values");
+        newGameTimestamp = savedInstanceState.getLong("newGameTimestamp");
     }
 }
 
