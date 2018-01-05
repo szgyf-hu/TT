@@ -21,13 +21,14 @@ public class Main2Activity extends AppCompatActivity {
         ArrayList<ScoreListItem> al=
                 new ScoreListDBHelper(this).getAllScoreListItems();
 
-        ArrayAdapter ad = new ArrayAdapter(this,
+        /*ArrayAdapter ad = new ArrayAdapter(this,
                 android.R.layout.simple_list_item_1,
-                al);
+                al);*/
 
         CustomArrayAdapter caa = new CustomArrayAdapter(this);
+        caa.addAll(al);
 
-        ((ListView) findViewById(R.id.listView)).setAdapter(ad);
+        ((ListView) findViewById(R.id.listView)).setAdapter(caa);
 
 
         ((Button) findViewById(R.id.startgame)).setOnClickListener(
