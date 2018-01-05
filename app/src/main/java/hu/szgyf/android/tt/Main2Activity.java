@@ -25,8 +25,9 @@ public class Main2Activity extends AppCompatActivity {
                 android.R.layout.simple_list_item_1,
                 al);
 
-        ((ListView) findViewById(R.id.listView)).setAdapter(ad);
+        CustomArrayAdapter caa = new CustomArrayAdapter(this);
 
+        ((ListView) findViewById(R.id.listView)).setAdapter(ad);
 
 
         ((Button) findViewById(R.id.startgame)).setOnClickListener(
