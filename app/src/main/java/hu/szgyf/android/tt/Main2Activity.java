@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -21,15 +23,21 @@ public class Main2Activity extends AppCompatActivity {
         ArrayList<ScoreListItem> al=
                 new ScoreListDBHelper(this).getAllScoreListItems();
 
-        /*ArrayAdapter ad = new ArrayAdapter(this,
-                android.R.layout.simple_list_item_1,
-                al);*/
-
         CustomArrayAdapter caa = new CustomArrayAdapter(this);
         caa.addAll(al);
 
-        ((ListView) findViewById(R.id.listView)).setAdapter(caa);
+        ListView lv = (ListView) findViewById(R.id.listView);
+        lv.setAdapter(caa);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 
+                ScoreListItem sli=new ScoreListDBHelper(Main2Activity.this).getScoreListItemById((int)id);
+
+                Toast.makeText(Main2Activity.this,sli.toString(),Toast.LENGTH_LONG)
+                        .show();
+            }
+        });
 
         ((Button) findViewById(R.id.startgame)).setOnClickListener(
                 new View.OnClickListener() {

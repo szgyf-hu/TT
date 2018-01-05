@@ -84,6 +84,24 @@ public class ScoreListDBHelper extends SQLiteOpenHelper {
          return out;
     }
 
+    public ScoreListItem getScoreListItemById(int Id){
+        // READ
+        SQLiteDatabase db= this.getReadableDatabase();
+        Cursor c =db.rawQuery(
+                "SELECT * FROM scorelist WHERE id = ?",
+                new String[] {""+Id}
+                );
+
+        if (c.moveToFirst())
+                return
+                        new ScoreListItem(
+                                c.getInt(c.getColumnIndex("id")),
+                                c.getString(c.getColumnIndex("name")),
+                                c.getInt(c.getColumnIndex("score"))
+                        );
+        return null;
+    }
+
     public void delScoreListItem(ScoreListItem sli)
     {
         SQLiteDatabase db = this.getWritableDatabase();
