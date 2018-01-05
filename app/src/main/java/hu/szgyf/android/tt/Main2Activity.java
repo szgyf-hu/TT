@@ -7,12 +7,24 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class Main2Activity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
+
+        ArrayList<ScoreListItem> al=
+                new ScoreListDBHelper(this).getAllScoreListItems();
+
+        if (!al.isEmpty())
+        {
+            ((TextView)findViewById(R.id.bestscore)).
+                    setText(al.get(0).toString());
+        }
+
 
         ((Button) findViewById(R.id.startgame)).setOnClickListener(
                 new View.OnClickListener() {

@@ -265,6 +265,11 @@ public class MainActivity extends AppCompatActivity {
 
             Toast.makeText(this, "Gém óvör! sec:" + sec, Toast.LENGTH_LONG).show();
 
+            new ScoreListDBHelper(this).
+                    saveScoreListItem(
+                            new ScoreListItem("vasmacska", sec)
+                    );
+
             MediaPlayer mp = MediaPlayer.create(this, R.raw.applause2);
             mp.start();
         }
