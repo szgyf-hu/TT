@@ -1,21 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
         android:id="@+id/idfield"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/picture_frame"
+        android:backgroundTint="@android:color/holo_blue_bright"
+        android:text="ID: 123"
+        app:layout_constraintBottom_toTopOf="@id/namefield"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/scorefield"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/namefield"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/picture_frame"
+        android:backgroundTint="@android:color/holo_green_light"
+        android:backgroundTintMode="src_over"
+        android:text="Name: Vasmacska"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/scorefield"
+        app:layout_constraintTop_toBottomOf="@id/idfield" />
 
     <TextView
         android:id="@+id/scorefield"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="67dp"
+        android:layout_height="match_parent"
+        android:background="@android:drawable/alert_light_frame"
+        android:backgroundTint="@android:color/holo_purple"
+        android:gravity="center"
+        android:text="12"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
